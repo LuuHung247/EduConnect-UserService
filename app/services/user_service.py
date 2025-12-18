@@ -102,20 +102,34 @@ class UserService:
     def update_user(self, user_id: str, data: Dict[str, Any], avatar_file=None) -> Optional[Dict[str, Any]]:
         """Update user with optional avatar upload"""
         if avatar_file:
+            print(f"[DEBUG] Uploading avatar for user: {user_id}")
+            print(f"[DEBUG] Avatar file: {getattr(avatar_file, 'filename', 'unknown')}")
+
             # Delete old avatar if exists
             current_user = self._repository.find_by_id(user_id)
             if current_user and current_user.get("avatar"):
                 try:
-                    self._media_client.delete_file(current_user.get("avatar"))
+                    old_avatar = current_user.get("avatar")
+                    print(f"[DEBUG] Deleting old avatar: {old_avatar}")
+                    self._media_client.delete_file(old_avatar)
                 except Exception as e:
-                    print(f"Error deleting old avatar: {e}")
+                    print(f"[ERROR] Error deleting old avatar: {e}")
 
             # Upload new avatar
+            print(f"[DEBUG] Calling media service to upload thumbnail...")
             avatar_url = self._media_client.upload_thumbnail(avatar_file, user_id)
+            print(f"[DEBUG] Media service response - avatar_url: {avatar_url}")
+
             if avatar_url:
                 data["avatar"] = avatar_url
+                print(f"[DEBUG] Avatar URL set in data: {avatar_url}")
+            else:
+                print(f"[ERROR] No avatar URL returned from media service!")
 
-        return self._repository.update(user_id, data)
+        print(f"[DEBUG] Updating user in database with data: {data}")
+        result = self._repository.update(user_id, data)
+        print(f"[DEBUG] Database update result - avatar field: {result.get('avatar') if result else 'None'}")
+        return result
 
     def update_user_by_cognito_id(self, cognito_id: str, data: Dict[str, Any], avatar_file=None) -> Dict[str, Any]:
         """Update user by cognito ID with optional avatar upload"""

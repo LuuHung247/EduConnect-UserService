@@ -7,7 +7,7 @@ class MediaServiceClient:
     """Client to communicate with Media Storage Microservice"""
 
     def __init__(self):
-        self.base_url = os.environ.get('MEDIA_SERVICE_URL', 'http://localhost:8001')
+        self.base_url = os.environ.get('MEDIA_SERVICE_URL', 'http://localhost:8004')
         self.timeout = 300  # 5 minutes for large files
 
     def _make_request(self, method: str, endpoint: str, **kwargs):

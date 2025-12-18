@@ -14,7 +14,10 @@ def create_app(config_object=None):
     Follows the same pattern as EduConnect Backend
     """
     app = Flask(__name__, static_folder=None)
-    CORS(app)
+
+    # Configure CORS with origins from environment
+    cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173')
+    CORS(app, origins=cors_origins, supports_credentials=True)
 
     if config_object:
         app.config.from_object(config_object)

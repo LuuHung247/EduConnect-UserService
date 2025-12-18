@@ -94,26 +94,39 @@ def get_user(user_id):
 def update_user_profile(user_id):
     """Update user profile with optional avatar upload"""
     try:
+        print(f"[DEBUG] Update user profile for: {user_id}")
+        print(f"[DEBUG] Request content type: {request.content_type}")
+        print(f"[DEBUG] Request files: {list(request.files.keys())}")
+        print(f"[DEBUG] Request form: {list(request.form.keys())}")
+
         # Handle both JSON and multipart/form-data
         avatar_file = None
         if request.files and 'avatar' in request.files:
             avatar_file = request.files['avatar']
+            print(f"[DEBUG] Avatar file found: {avatar_file.filename}")
             # Get other data from form
             data = request.form.to_dict()
+            print(f"[DEBUG] Form data: {data}")
         else:
             # Regular JSON update
             data = request.get_json() or {}
+            print(f"[DEBUG] JSON data: {data}")
 
         # Check if user exists
         existing = get_user_by_id(user_id)
         if not existing:
             return _error_response("User not found", 404)
 
+        print(f"[DEBUG] Calling update_user with avatar_file: {avatar_file}")
         # Update user with optional avatar
         updated = update_user(user_id, data, avatar_file)
+        print(f"[DEBUG] Update result - avatar field: {updated.get('avatar') if updated else 'None'}")
         return _success_response(updated, "User updated successfully")
 
     except Exception as e:
+        print(f"[ERROR] Exception in update_user_profile: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return _error_response(str(e))
 
 
